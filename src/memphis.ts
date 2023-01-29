@@ -1076,7 +1076,8 @@ class Consumer {
             const subject = this.stationName?.replace(/\./g, '#').toLowerCase();
             const consumerGroup = this.consumerGroup?.replace(/\./g, '#').toLowerCase();
             const consumerName = this.consumerName?.replace(/\./g, '#').toLowerCase();
-            if(this.connection.brokerConnection) {
+            console.log('this.connection.brokerConnection: ', this.connection.brokerConnection)
+            if(!this.connection.brokerManager?.isClosed()) {
                 this.connection.brokerConnection
                     ?.pullSubscribe(`${subject}.final`, {
                         mack: true,
