@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Credit for The NATS.IO Authors
 // Copyright 2021-2022 The Memphis Authors
 // Licensed under the Apache License, Version 2.0 (the “License”);
@@ -87,7 +88,7 @@ export class Memphis {
     private reconnectIntervalMs: number;
     private timeoutMs: number;
     public brokerConnection: any;
-    public brokerManager: any;
+    public brokerManager: broker.NatsConnection;
     public brokerStats: any;
     public retentionTypes!: IRetentionTypes;
     public storageTypes!: IStorageTypes;
@@ -144,18 +145,18 @@ export class Memphis {
      */
 
     connect({
-        host,
-        port = 6666,
-        username,
-        connectionToken,
-        reconnect = true,
-        maxReconnect = 3,
-        reconnectIntervalMs = 5000,
-        timeoutMs = 15000,
-        keyFile = '',
-        certFile = '',
-        caFile = ''
-    }: {
+                host,
+                port = 6666,
+                username,
+                connectionToken,
+                reconnect = true,
+                maxReconnect = 3,
+                reconnectIntervalMs = 5000,
+                timeoutMs = 15000,
+                keyFile = '',
+                certFile = '',
+                caFile = ''
+            }: {
         host: string;
         port?: number;
         username: string;
@@ -407,16 +408,16 @@ export class Memphis {
      * @param {String} schemaName - schema name.
      */
     async station({
-        name,
-        retentionType = retentionTypes.MAX_MESSAGE_AGE_SECONDS,
-        retentionValue = 604800,
-        storageType = storageTypes.DISK,
-        replicas = 1,
-        idempotencyWindowMs = 120000,
-        schemaName = '',
-        sendPoisonMsgToDls = true,
-        sendSchemaFailedMsgToDls = true
-    }: {
+                      name,
+                      retentionType = retentionTypes.MAX_MESSAGE_AGE_SECONDS,
+                      retentionValue = 604800,
+                      storageType = storageTypes.DISK,
+                      replicas = 1,
+                      idempotencyWindowMs = 120000,
+                      schemaName = '',
+                      sendPoisonMsgToDls = true,
+                      sendSchemaFailedMsgToDls = true
+                  }: {
         name: string;
         retentionType?: string;
         retentionValue?: number;
@@ -560,18 +561,18 @@ export class Memphis {
      * @param {Number} lastMessages - consume the last N messages, defaults to -1 (all messages in the station)
      */
     async consumer({
-        stationName,
-        consumerName,
-        consumerGroup = '',
-        pullIntervalMs = 1000,
-        batchSize = 10,
-        batchMaxTimeToWaitMs = 5000,
-        maxAckTimeMs = 30000,
-        maxMsgDeliveries = 10,
-        genUniqueSuffix = false,
-        startConsumeFromSequence = 1,
-        lastMessages = -1
-    }: {
+                       stationName,
+                       consumerName,
+                       consumerGroup = '',
+                       pullIntervalMs = 1000,
+                       batchSize = 10,
+                       batchMaxTimeToWaitMs = 5000,
+                       maxAckTimeMs = 30000,
+                       maxMsgDeliveries = 10,
+                       genUniqueSuffix = false,
+                       startConsumeFromSequence = 1,
+                       lastMessages = -1
+                   }: {
         stationName: string;
         consumerName: string;
         consumerGroup?: string;
@@ -647,7 +648,7 @@ export class Memphis {
     /**
      * Close Memphis connection.
      */
-    close() {
+    async close() {
         for (let key of this.schemaUpdatesSubs.keys()) {
             let sub = this.schemaUpdatesSubs.get(key);
             if (sub) sub.unsubscribe();
@@ -657,9 +658,7 @@ export class Memphis {
             this.meassageDescriptors.delete(key);
             this.jsonSchemas.delete(key);
         }
-        setTimeout(() => {
-            this.brokerManager && this.brokerManager.close();
-        }, 500);
+        return this.brokerManager?.close();
     }
 }
 
@@ -726,12 +725,12 @@ class Producer {
      * @param {Any} headers - Message headers - javascript object or using the memphis interface for headers (memphis.headers()).
      */
     async produce({
-        message,
-        ackWaitSec = 15,
-        asyncProduce = false,
-        headers = new MsgHeaders(),
-        msgId = null
-    }: {
+                      message,
+                      ackWaitSec = 15,
+                      asyncProduce = false,
+                      headers = new MsgHeaders(),
+                      msgId = null
+                  }: {
         message: any;
         ackWaitSec?: number;
         asyncProduce?: boolean;

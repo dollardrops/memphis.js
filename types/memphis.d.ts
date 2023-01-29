@@ -23,7 +23,7 @@ export declare class Memphis {
     private reconnectIntervalMs;
     private timeoutMs;
     brokerConnection: any;
-    brokerManager: any;
+    brokerManager: broker.NatsConnection;
     brokerStats: any;
     retentionTypes: IRetentionTypes;
     storageTypes: IStorageTypes;
@@ -96,7 +96,7 @@ export declare class Memphis {
         lastMessages?: number;
     }): Promise<Consumer>;
     headers(): MsgHeaders;
-    close(): void;
+    close(): Promise<void>;
 }
 declare class MsgHeaders {
     headers: MsgHdrs;
