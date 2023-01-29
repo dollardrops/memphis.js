@@ -650,6 +650,7 @@ export class Memphis {
                 throw MemphisError(new Error(errMsg));
             }
 
+
             return new Consumer(
                 this,
                 stationName,
@@ -1083,13 +1084,13 @@ class Consumer {
                     }
                 })
                 .then(async (psub: any) => {
-                    psub.pull({
+                    psub?.pull({
                         batch: this.batchSize,
                         expires: this.batchMaxTimeToWaitMs
                     });
                     this.pullInterval = setInterval(() => {
                         if (!this.connection.brokerManager?.isClosed())
-                            psub.pull({
+                            psub?.pull({
                                 batch: this.batchSize,
                                 expires: this.batchMaxTimeToWaitMs
                             });
@@ -1102,7 +1103,7 @@ class Consumer {
                         } else clearInterval(this.pingConsumerInvterval);
                     }, this.pingConsumerInvtervalMs);
 
-                    const sub = this.connection.brokerManager.subscribe(`$memphis_dls_${subject}_${consumerGroup}`, {
+                    const sub = this.connection.brokerManager?.subscribe(`$memphis_dls_${subject}_${consumerGroup}`, {
                         queue: `$memphis_${subject}_${consumerGroup}`
                     });
                     this._handleAsyncIterableSubscriber(psub);
