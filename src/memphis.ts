@@ -1073,45 +1073,46 @@ class Consumer {
      */
     on(event: String, cb: (...args: any[]) => void) {
         if (event === 'message') {
-            const subject = this.stationName.replace(/\./g, '#').toLowerCase();
-            const consumerGroup = this.consumerGroup.replace(/\./g, '#').toLowerCase();
-            const consumerName = this.consumerName.replace(/\./g, '#').toLowerCase();
-            this.connection.brokerConnection
-                ?.pullSubscribe(`${subject}.final`, {
-                    mack: true,
-                    config: {
-                        durable_name: this.consumerGroup ? consumerGroup : consumerName
-                    }
-                })
-                .then(async (psub: any) => {
-                    psub?.pull({
-                        batch: this.batchSize,
-                        expires: this.batchMaxTimeToWaitMs
-                    });
-                    this.pullInterval = setInterval(() => {
-                        if (!this.connection.brokerManager?.isClosed())
-                            psub?.pull({
-                                batch: this.batchSize,
-                                expires: this.batchMaxTimeToWaitMs
-                            });
-                        else clearInterval(this.pullInterval);
-                    }, this.pullIntervalMs);
+            const subject = this.stationName?.replace(/\./g, '#').toLowerCase();
+            const consumerGroup = this.consumerGroup?.replace(/\./g, '#').toLowerCase();
+            const consumerName = this.consumerName?.replace(/\./g, '#').toLowerCase();
+            if(this.connection.brokerConnection) {
+                this.connection.brokerConnection
+                    ?.pullSubscribe(`${subject}.final`, {
+                        mack: true,
+                        config: {
+                            durable_name: this.consumerGroup ? consumerGroup : consumerName
+                        }
+                    })
+                    .then(async (psub: any) => {
+                        psub?.pull({
+                            batch: this.batchSize,
+                            expires: this.batchMaxTimeToWaitMs
+                        });
+                        this.pullInterval = setInterval(() => {
+                            if (!this.connection.brokerManager?.isClosed())
+                                psub?.pull({
+                                    batch: this.batchSize,
+                                    expires: this.batchMaxTimeToWaitMs
+                                });
+                            else clearInterval(this.pullInterval);
+                        }, this.pullIntervalMs);
 
-                    this.pingConsumerInvterval = setInterval(async () => {
-                        if (!this.connection.brokerManager?.isClosed()) {
-                            this._pingConsumer();
-                        } else clearInterval(this.pingConsumerInvterval);
-                    }, this.pingConsumerInvtervalMs);
+                        this.pingConsumerInvterval = setInterval(async () => {
+                            if (!this.connection.brokerManager?.isClosed()) {
+                                this._pingConsumer();
+                            } else clearInterval(this.pingConsumerInvterval);
+                        }, this.pingConsumerInvtervalMs);
 
-                    const sub = this.connection.brokerManager?.subscribe(`$memphis_dls_${subject}_${consumerGroup}`, {
-                        queue: `$memphis_${subject}_${consumerGroup}`
-                    });
-                    this._handleAsyncIterableSubscriber(psub);
-                    this._handleAsyncIterableSubscriber(sub);
-                })
-                .catch((error: any) => this.eventEmitter.emit('error', MemphisError(error)));
+                        const sub = this.connection.brokerManager?.subscribe(`$memphis_dls_${subject}_${consumerGroup}`, {
+                            queue: `$memphis_${subject}_${consumerGroup}`
+                        });
+                        this._handleAsyncIterableSubscriber(psub);
+                        this._handleAsyncIterableSubscriber(sub);
+                    })
+                    .catch((error: any) => this.eventEmitter.emit('error', MemphisError(error)));
+            }
         }
-
         this.eventEmitter.on(<string>event, cb);
     }
 
