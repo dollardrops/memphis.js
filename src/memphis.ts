@@ -129,6 +129,33 @@ export class Memphis {
         this.stationSchemaverseToDlsMap = new Map();
     }
 
+    resetVars() {
+        this.isConnectionActive = false;
+        this.host = '';
+        this.port = 6666;
+        this.username = '';
+        this.connectionToken = '';
+        this.reconnect = true;
+        this.maxReconnect = 3;
+        this.reconnectIntervalMs = 200;
+        this.timeoutMs = 15000;
+        this.brokerConnection = null;
+        this.brokerManager = null;
+        this.brokerStats = null;
+        this.retentionTypes = retentionTypes;
+        this.storageTypes = storageTypes;
+        this.JSONC = broker.JSONCodec();
+        this.connectionId = this._generateConnectionID();
+        this.stationSchemaDataMap = new Map();
+        this.schemaUpdatesSubs = new Map();
+        this.producersPerStation = new Map();
+        this.meassageDescriptors = new Map();
+        this.jsonSchemas = new Map();
+        this.graphqlSchemas = new Map();
+        this.clusterConfigurations = new Map();
+        this.stationSchemaverseToDlsMap = new Map();
+    }
+
     /**
      * Creates connection with Memphis.
      * @param {String} host - memphis host.
@@ -658,7 +685,8 @@ export class Memphis {
             this.meassageDescriptors.delete(key);
             this.jsonSchemas.delete(key);
         }
-        return this.brokerManager?.close();
+        await this.brokerManager?.close();
+        return this.resetVars()
     }
 }
 

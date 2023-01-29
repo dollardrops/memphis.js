@@ -37,6 +37,7 @@ export declare class Memphis {
     clusterConfigurations: Map<string, boolean>;
     stationSchemaverseToDlsMap: Map<string, boolean>;
     constructor();
+    resetVars(): void;
     connect({ host, port, username, connectionToken, reconnect, maxReconnect, reconnectIntervalMs, timeoutMs, keyFile, certFile, caFile }: {
         host: string;
         port?: number;
